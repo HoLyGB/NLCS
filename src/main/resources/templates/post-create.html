@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng tin mới - Chợ Nhanh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { border: none; }
+           /* CSS giữ nguyên màu sắc và hiệu ứng Navbar CHỢ NHANH */
+        .navbar-chonhanh {
+            background-color: #0d6efd; /* Hoặc mã màu xanh đặc trưng của bạn */
+        }
+        /* Hiệu ứng hover dropdown tên người dùng */
+        .nav-item.dropdown:hover .dropdown-menu {
+            display: block;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="navbar :: myNavbar"></div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm p-4">
+                <h4 class="fw-bold mb-4"><i class="fas fa-plus-circle me-2 text-primary"></i> Đăng tin mới</h4>
+                
+                <form th:action="@{/post/create}" th:object="${postDTO}" method="POST" enctype="multipart/form-data">
+                    <!-- Tiêu đề -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tiêu đề tin đăng</label>
+                        <input type="text" th:field="*{title}" class="form-control" placeholder="Ví dụ: Bán xe máy cũ chính chủ..." required>
+                    </div>
+
+                    <div class="row">
+                        <!-- Giá -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Giá (VNĐ)</label>
+                            <input type="number" th:field="*{price}" class="form-control" required>
+                        </div>
+                        <!-- Danh mục -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Danh mục</label>
+                            <select th:field="*{categoryId}" class="form-select" required>
+                                <option value="" disabled selected>-- Chọn danh mục --</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Tỉnh -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tỉnh / Thành phố</label>
+                            <input type="text" th:field="*{province}" class="form-control" required>
+                        </div>
+                        <!-- Quận Huyện (FIX LỖI NULL) -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Quận / Huyện</label>
+                            <input type="text" th:field="*{district}" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <!-- Thông số kỹ thuật (JSON) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Thông số kỹ thuật (Dạng JSON)</label>
+                        <textarea name="attributes" class="form-control" rows="2" placeholder='Ví dụ: {"RAM": "8GB", "Màu": "Đen"}'></textarea>
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả chi tiết</label>
+                        <textarea th:field="*{description}" class="form-control" rows="5" required></textarea>
+                    </div>
+                    <div class="mb-3">
+        <label class="form-label fw-bold">Chọn ảnh sản phẩm (có thể chọn nhiều)</label>
+        <input type="file" name="files" class="form-control" multiple accept="image/*" required>
+    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 mt-3">Đăng tin ngay</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-dark text-white text-center py-4 mt-5">
+    <p>© 2026 Chợ Nhanh - Nền tảng rao vặt trực tuyến</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+<script>
+    document.querySelector('form').addEventListener('submit', function() {
+        // Vô hiệu hóa nút đăng để không bấm được lần 2
+        document.querySelector('button[type="submit"]').disabled = true;
+        document.querySelector('button[type="submit"]').innerText = "Đang xử lý...";
+    });
+</script>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chợ Nhanh - Mua bán uy tín</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+        .sidebar-item a { text-decoration: none; color: #333; font-weight: 500; }
+        .sidebar-item a:hover { color: #0d6efd; }
+        .card-img-top { height: 180px; object-fit: cover; }
+        .post-card { transition: 0.3s; }
+        .post-card:hover { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<div th:replace="navbar :: myNavbar"></div>
+
+<!-- MAIN CONTENT -->
+<div class="container my-4">
+    <div class="row">
+        <!-- SIDEBAR DANH MỤC -->
+        <div class="col-md-3">
+            <div class="bg-white p-3 rounded shadow-sm border">
+                <h5 class="fw-bold mb-3"><i class="fas fa-list me-2"></i> Danh mục</h5>
+                
+                <div class="accordion accordion-flush" id="categoryAccordion">
+                    <!-- Vòng lặp lấy danh mục cha -->
+                    <div class="accordion-item" th:each="cat, iterStat : ${categories}">
+                        <h2 class="accordion-header">
+                            <!-- Nút bấm sổ xuống -->
+                            <button class="accordion-button collapsed" type="button" 
+                                    data-bs-toggle="collapse" 
+                                    th:data-bs-target="'#cat-' + ${cat.id}">
+                                <a th:href="@{'/category/' + ${cat.slug}}" th:text="${cat.name}" style="text-decoration:none; color:inherit;">Cha</a>
+                            </button>
+                        </h2>
+                        
+                        <!-- Danh sách danh mục con -->
+                        <div th:id="'cat-' + ${cat.id}" class="accordion-collapse collapse" data-bs-parent="#categoryAccordion">
+                            <div class="accordion-body p-0 ps-3">
+                                <ul class="list-unstyled">
+                                    <li th:each="sub : ${cat.subCategories}">
+                                        <a class="d-block py-2 text-muted" th:href="@{'/category/' + ${sub.slug}}" th:text="${sub.name}">Con</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DANH SÁCH TIN ĐĂNG -->
+        <div class="col-md-9">
+<!-- 👉 FORM LỌC NÂNG CAO (Dạng chọn khoảng giá) -->
+<div class="bg-white p-4 rounded shadow-sm border mb-4">
+    <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-filter me-2"></i> Lọc nâng cao</h5>
+    <form action="/search/advanced" method="GET" class="row g-3">
+        
+        <!-- Dropdown chọn khoảng giá -->
+        <div class="col-md-6">
+            <label class="form-label small fw-semibold">Khoảng giá</label>
+          <select class="form-select" name="priceRange">
+    <option value="">-- Tất cả mức giá --</option>
+    <option value="0-500000" th:selected="${param.priceRange != null and param.priceRange[0] == '0-500000'}">Dưới 500.000 đ</option>
+    <option value="500000-1000000" th:selected="${param.priceRange != null and param.priceRange[0] == '500000-1000000'}">500.000 đ - 1 Triệu</option>
+    <option value="1000000-3000000" th:selected="${param.priceRange != null and param.priceRange[0] == '1000000-3000000'}">1 Triệu - 3 Triệu</option>
+    <option value="3000000-999999999" th:selected="${param.priceRange != null and param.priceRange[0] == '3000000-999999999'}">Trên 3 Triệu</option>
+</select>
+        </div>
+
+        <!-- Khu vực -->
+        <div class="col-md-6">
+            <label class="form-label small fw-semibold">Khu vực (Tỉnh/Thành)</label>
+            <input type="text" class="form-control" name="province" th:value="${param.province}" placeholder="VD: Cần Thơ">
+        </div>
+        
+        <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+            <a href="/trangchu" class="btn btn-outline-secondary px-3"><i class="fas fa-redo me-1"></i> Đặt lại</a>
+            <button type="submit" class="btn btn-primary px-4"><i class="fas fa-search me-1"></i> Lọc kết quả</button>
+        </div>
+    </form>
+</div>
+   <!-- DANH SÁCH TIN ĐĂNG HOẶC THÔNG BÁO TRỐNG -->
+
+<!-- DANH SÁCH TIN ĐĂNG -->
+
+    <h4 class="fw-bold mb-3">Tin đăng mới nhất</h4>
+
+    <!-- Trường hợp CÓ sản phẩm -->
+    <div class="row row-cols-1 row-cols-md-3 g-4" th:if="${posts != null and !posts.isEmpty()}">
+        <div class="col" th:each="post : ${posts}">
+            <div class="card h-100 post-card shadow-sm border-0 position-relative">
+                <img th:src="${!post.images.isEmpty() ? post.images[0].imageUrl : '/images/default.jpg'}" class="card-img-top" alt="Ảnh tin">
+                <div class="card-body">
+                    <h6 class="card-title fw-bold text-truncate" th:text="${post.title}">Tiêu đề</h6>
+                    <p class="text-danger fw-bold mb-1" th:text="${#numbers.formatDecimal(post.price, 0, 'POINT', 0, 'POINT')} + ' đ'">Giá</p>
+                    <small class="text-muted"><i class="fas fa-map-marker-alt"></i> <span th:text="${post.province}">Tỉnh</span></small>
+                </div>
+                
+                <!-- Nút Tim bài viết -->
+                <div class="position-absolute top-0 end-0 p-2">
+                    <button class="btn btn-light rounded-circle shadow-sm p-2 d-flex align-items-center justify-content-center" 
+                            style="width: 35px; height: 35px;"
+                            th:onclick="'toggleWishlist(' + ${post.id} + ', this)'">
+                        <i th:class="${session.loggedInUser != null and @wishlistService.isPostSaved(post.id, session.loggedInUser.id)} ? 'fas fa-heart text-danger' : 'far fa-heart text-danger'"></i>
+                    </button>
+                </div>
+
+                <div class="card-footer bg-white border-0 text-center">
+                    <a th:href="@{'/post/' + ${post.id}}" class="btn btn-outline-primary w-100">Xem chi tiết</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- 👉 THANH PHÂN TRANG RÚT GỌN THÔNG MINH -->
+<nav th:if="${posts.totalPages > 1}" aria-label="Page navigation" class="my-4">
+    <ul class="pagination justify-content-center">
+        
+        <!-- Nút Về trang đầu tiên nếu đang ở xa -->
+        <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
+            <a class="page-link" th:href="@{/search/advanced(page=0, priceRange=${param.priceRange}, province=${param.province})}">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+        </li>
+
+        <!-- Nút Quay lại trang trước -->
+        <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
+            <a class="page-link" th:href="@{/search/advanced(page=${posts.number - 1}, priceRange=${param.priceRange}, province=${param.province})}">
+                <i class="fas fa-chevron-left small"></i> Trước
+            </a>
+        </li>
+        
+        <!-- Dấu ... ở đầu nếu trang hiện tại cách xa trang 0 -->
+        <li class="page-item disabled" th:if="${startPage > 0}">
+            <span class="page-link">...</span>
+        </li>
+
+        <!-- Các số trang ở giữa (Rút gọn chỉ hiển thị xung quanh trang hiện tại) -->
+        <li class="page-item" th:each="i : ${#numbers.sequence(startPage, endPage)}" th:classappend="${i == posts.number} ? 'active'">
+            <a class="page-link" th:href="@{/search/advanced(page=${i}, priceRange=${param.priceRange}, province=${param.province})}" th:text="${i + 1}">1</a>
+        </li>
+
+        <!-- Dấu ... ở cuối nếu còn cách xa trang cuối -->
+        <li class="page-item disabled" th:if="${endPage < posts.totalPages - 1}">
+            <span class="page-link">...</span>
+        </li>
+        
+        <!-- Nút Đi tới trang sau -->
+        <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
+            <a class="page-link" th:href="@{/search/advanced(page=${posts.number + 1}, priceRange=${param.priceRange}, province=${param.province})}">
+                Sau <i class="fas fa-chevron-right small"></i>
+            </a>
+        </li>
+
+        <!-- Nút Đến trang cuối cùng -->
+        <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
+            <a class="page-link" th:href="@{/search/advanced(page=${posts.totalPages - 1}, priceRange=${param.priceRange}, province=${param.province})}">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+    <!-- Trường hợp KHÔNG TÌM THẤY sản phẩm nào -->
+    <div class="text-center py-5 bg-white rounded shadow-sm border" th:if="${posts == null or posts.isEmpty()}">
+        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+        <h5 class="text-secondary fw-bold">Không tìm thấy sản phẩm nào phù hợp!</h5>
+        <p class="text-muted small">Hãy thử thay đổi mức giá hoặc khu vực lọc khác nhé.</p>
+        <a href="/trangchu" class="btn btn-primary btn-sm mt-2"><i class="fas fa-redo me-1"></i> Xem tất cả tin đăng</a>
+    </div>
+
+    </div>
+</div>
+
+<footer class="bg-dark text-white text-center py-4 mt-5">
+    <p>© 2026 Chợ Nhanh - Nền tảng rao vặt trực tuyến</p>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script xử lý Wishlist -->
+<script>
+function toggleWishlist(postId, btn) {
+    fetch('/api/wishlist/toggle/' + postId, {
+        method: 'POST'
+    })
+    .then(response => {
+        if (response.status === 401 || response.status === 403) {
+            alert("Vui lòng đăng nhập để lưu tin!");
+            window.location.href = '/login';
+            return null;
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data) {
+            const icon = btn.querySelector('i');
+            if (data.saved) {
+                icon.classList.remove('far');
+                icon.classList.add('fas'); // Trái tim đặc đỏ
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far'); // Trái tim rỗng
+            }
+        }
+    })
+    .catch(err => console.error("Lỗi:", err));
+}
+</script>
+</body>
+</html>

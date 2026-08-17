@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý danh mục - Chợ Nhanh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar { min-height: 100vh; background-color: #212529; }
+        .sidebar .nav-link { color: #cbd5e1; padding: 12px 20px; margin-bottom: 5px; border-radius: 8px; transition: 0.3s; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: white; background-color: #0d6efd; }
+    </style>
+</head>
+
+<body class="bg-light">
+<div class="container-fluid">
+    <div class="row">
+        <!-- SIDEBAR -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar px-3">
+            <div class="position-sticky pt-4">
+                <h4 class="text-white text-center pb-3 border-bottom border-secondary">⚡ Chợ Nhanh Admin</h4>
+                <ul class="nav flex-column mt-4">
+                    <li class="nav-item"><a class="nav-link" href="/admin/dashboard"><i class="fas fa-chart-pie me-2"></i> Tổng quan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="fas fa-users me-2"></i> Quản lý Người dùng</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/posts"><i class="fas fa-newspaper me-2"></i> Quản lý Bài viết</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/admin/categories"><i class="fas fa-list me-2"></i> Quản lý Danh mục</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4">
+            <div class="d-flex justify-content-between mb-4">
+                <h2>Quản lý Danh mục</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#categoryModal" onclick="prepareAdd()">
+                    <i class="fas fa-plus"></i> Thêm danh mục
+                </button>
+            </div>
+<!-- Đặt đoạn này ngay trên thẻ div class="table-responsive..." -->
+<form th:action="@{/admin/categories}" method="get" class="d-flex mb-3">
+    <input type="text" name="search" th:value="${search}" class="form-control me-2" 
+           placeholder="Tìm theo tên danh mục..." style="max-width: 300px;">
+    <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search"></i> Tìm kiếm</button>
+    <a href="/admin/categories" class="btn btn-outline-secondary ms-2">Hủy</a>
+</form>
+            <div class="table-responsive bg-white p-3 rounded shadow-sm border">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr><th>ID</th><th>Tên danh mục</th><th>Thao tác</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="cat : ${categories}">
+                            <td th:text="${cat.id}">1</td>
+                            <td th:text="${cat.name}">Điện thoại</td>
+                            <td>
+                                <!-- Dùng data-id, data-name để lưu dữ liệu, không truyền trực tiếp vào onclick -->
+<!-- Sửa đoạn này -->
+<button class="btn btn-sm btn-outline-warning" 
+        th:data-id="${cat.id}" 
+        th:data-name="${cat.name}" 
+        th:data-parent-id="${cat.parentId != null ? cat.parentId : ''}" 
+        onclick="prepareEdit(this)">
+    <i class="fas fa-edit"></i>
+</button>
+                                <!-- Sửa nút Xóa thành -->
+<button class="btn btn-sm btn-outline-danger" 
+        th:data-id="${cat.id}" 
+        onclick="deleteCategoryByButton(this)">
+    <i class="fas fa-trash"></i>
+</button>
+
+<script>
+    function deleteCategoryByButton(button) {
+        const id = button.getAttribute('data-id');
+        deleteCategory(id); // Gọi hàm deleteCategory cũ của bạn
+    }
+</script>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- MODAL THÊM/SỬA -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="modalTitle">Danh mục</h5></div>
+            <div class="modal-body">
+                <input type="hidden" id="catId">
+                <div class="mb-3"><label>Tên danh mục</label><input type="text" id="catName" class="form-control"></div>
+              <div class="mb-3">
+    <label class="form-label">Danh mục cha</label>
+    <select id="catParentId" class="form-select">
+        <option value="">-- Không có (Danh mục gốc) --</option>
+        <option th:each="c : ${allCategories}" 
+                th:value="${c.id}" 
+                th:text="${c.name}"></option>
+    </select>
+</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-primary" onclick="saveCategory()">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const modal = new bootstrap.Modal(document.getElementById('categoryModal'));
+
+    function prepareAdd() {
+        document.getElementById('catId').value = '';
+        document.getElementById('catName').value = '';
+        
+        // RESET DROPDOWN KHI THÊM MỚI
+        document.getElementById('catParentId').value = ""; 
+        
+        modal.show();
+    }
+
+ // Thay đổi hàm prepareEdit thành thế này:
+function prepareEdit(button) {
+    const id = button.getAttribute('data-id');
+    const name = button.getAttribute('data-name');
+    const parentId = button.getAttribute('data-parent-id'); 
+
+    // LOG ĐỂ BẮT BỆNH
+    console.log("Giá trị parentId nhận được từ nút bấm:", parentId);
+
+    document.getElementById('catId').value = id;
+    document.getElementById('catName').value = name;
+
+    const selectElement = document.getElementById('catParentId');
+    
+    // Gán giá trị: Nếu parentId rỗng thì chọn option đầu tiên (value="")
+    // Nếu có giá trị thì gán thẳng vào.
+    selectElement.value = parentId ? parentId : "";
+    
+    console.log("Select đã chọn value là:", selectElement.value);
+
+    modal.show();
+}
+    function saveCategory() {
+        const id = document.getElementById('catId').value;
+        const parentId = document.getElementById('catParentId').value;
+        
+        // Ép kiểu dữ liệu thật chặt chẽ
+        let parsedParentId = null;
+        if (parentId && parentId !== "") {
+            parsedParentId = parseInt(parentId);
+        }
+
+        const data = { 
+            name: document.getElementById('catName').value,
+            parentId: parsedParentId 
+        };
+
+        console.log("--- DEBUG GỬI LÊN SERVER ---");
+        console.log("ID danh mục:", id);
+        console.log("Data gửi đi:", JSON.stringify(data));
+
+        const url = id ? '/api/admin/categories/' + id : '/api/admin/categories';
+        const method = id ? 'PUT' : 'POST';
+
+        fetch(url, { 
+            method: method, 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify(data) 
+        })
+        .then(res => {
+            if(res.ok) {
+                location.reload();
+            } else {
+                console.error("Lỗi server trả về");
+                alert("Lỗi cập nhật!");
+            }
+        });
+    }
+
+    function deleteCategory(id) {
+        if(confirm("Bạn có chắc chắn muốn xóa?")) {
+            fetch('/api/admin/categories/' + id, { method: 'DELETE' })
+            .then(res => res.ok ? location.reload() : alert("Lỗi xóa!"));
+        }
+    }
+</script>
+</body>
+</html>

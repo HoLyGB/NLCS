@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Định nghĩa fragment với tên là myNavbar -->
+    <nav th:fragment="myNavbar" class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top py-3">
+        <div class="container">
+            <!-- Brand / Logo -->
+            <a class="navbar-brand fw-bold fs-4 text-white d-flex align-items-center" href="/trangchu">
+                <i class="fas fa-bolt text-warning me-2"></i> CHỢ NHANH
+            </a>
+
+            <!-- Nút thu gọn trên mobile -->
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Nội dung Navbar -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Thanh tìm kiếm -->
+                <form class="d-flex mx-lg-auto my-3 my-lg-0 w-100 w-lg-50" action="/search" method="GET">
+                    <div class="input-group shadow-sm rounded-pill overflow-hidden bg-white">
+<input class="form-control border-0 ps-4 shadow-none" type="search" placeholder="Bạn cần tìm gì..." name="keyword" th:value="${keyword}">                        <button class="btn btn-warning text-white px-4 border-0 shadow-none" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Các nút chức năng bên phải -->
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    <!-- Nút Tin nhắn -->
+                    <li class="nav-item">
+                        <a class="nav-link text-white d-flex align-items-center px-3 py-2 rounded-pill position-relative" 
+                           href="/chat/inbox" style="background: rgba(255, 255, 255, 0.15);">
+                            <i class="fas fa-comment-dots fs-5 me-2 text-warning"></i> 
+                            <span class="fw-medium">Tin nhắn</span>
+                            <span th:if="${unreadCount > 0}" 
+                                  class="position-absolute top-25 start-100 translate-middle badge rounded-pill bg-danger border border-white shadow-sm"
+                                  style="font-size: 0.65rem;" th:text="${unreadCount}">3</span>
+                        </a>
+                    </li>
+
+                    <!-- Nút Đăng tin -->
+                    <li class="nav-item">
+                        <a href="/post/create" class="btn btn-light text-primary fw-bold rounded-pill px-3 shadow-sm d-flex align-items-center">
+                            <i class="fas fa-plus-circle me-1"></i> Đăng tin
+                        </a>
+                    </li>
+
+                    <!-- TRƯỜNG HỢP 1: Đã đăng nhập -->
+                    <li class="nav-item dropdown" th:if="${session.loggedInUser != null}">
+                        <a class="nav-link dropdown-toggle text-white fw-semibold d-flex align-items-center py-1 px-2 rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 32px; height: 32px;">
+                                <i class="fas fa-user small"></i>
+                            </div>
+                            <span th:text="${session.loggedInUser.fullName}">Tên User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+                            <li><a class="dropdown-item py-2" href="/user/my-posts"><i class="fas fa-clipboard-list me-2 text-primary"></i> Quản lý tin của tôi</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- TRƯỜNG HỢP 2: Chưa đăng nhập -->
+                    <li class="nav-item" th:unless="${session.loggedInUser != null}">
+                        <a href="/dangnhap" class="btn btn-outline-light rounded-pill px-4 fw-semibold">
+                            <i class="fas fa-sign-in-alt me-1"></i> Đăng nhập
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</body>
+</html>

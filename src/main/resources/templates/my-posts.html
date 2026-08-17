@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý tin đăng - Chợ Nhanh</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .navbar-chonhanh { background-color: #0d6efd; }
+        .nav-item.dropdown:hover .dropdown-menu { display: block; margin-top: 0; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- 1. THANH NAVBAR CHỢ NHANH -->
+    <div th:replace="navbar :: myNavbar"></div>
+
+    <!-- 2. NỘI DUNG CHÍNH: QUẢN LÝ TIN ĐĂNG -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-12">
+                
+                <!-- Tiêu đề và Thanh tìm kiếm nhỏ -->
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <h3 class="fw-bold text-dark m-0"><i class="fas fa-clipboard-list text-primary me-2"></i> Tin đăng của tôi</h3>
+   
+                    <!-- 👉 Thanh tìm kiếm nhỏ -->
+                    <form action="/user/my-posts" method="GET" class="d-flex" style="width: 280px;">
+                        <input type="text" class="form-control form-control-sm me-2 rounded-pill ps-3 shadow-none" 
+                               name="keyword" th:value="${keyword}" placeholder="Tìm theo tiêu đề tin...">
+                        <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+<div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+    <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+                <!-- Card bọc bảng quản lý -->
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-body p-0">
+                        
+                        <!-- Trường hợp có tin đăng -->
+                        <div class="table-responsive" th:if="${myPosts != null and not myPosts.empty}">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light text-uppercase fs-7 text-muted">
+                                    <tr>
+                                        <th class="py-3 ps-4">Sản phẩm</th>
+                                        <th class="py-3">Tiêu đề</th>
+                                        <th class="py-3">Giá</th>
+                                        <th class="py-3">Trạng thái</th>
+                                        <th class="py-3 text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="post : ${myPosts.content}">
+                                        <!-- Ảnh sản phẩm -->
+                                        <td class="ps-4 py-3">
+                                            <img th:src="${!post.images.isEmpty() ? post.images[0].imageUrl : '/images/default.jpg'}" 
+                                                 class="rounded-3 shadow-sm"
+                                                 style="width: 70px; height: 70px; object-fit: cover;">
+                                        </td>
+                                        
+                                        <!-- Tiêu đề -->
+                                        <td>
+                                            <a th:href="@{'/post/' + ${post.id}}" class="text-decoration-none fw-semibold text-dark text-truncate d-inline-block" style="max-width: 300px;" th:text="${post.title}">Tiêu đề bài viết</a>
+                                            <div class="text-muted fs-7"><i class="fas fa-map-marker-alt me-1"></i><span th:text="${post.province}">Tỉnh/Thành</span></div>
+                                        </td>
+                                        
+                                        <!-- Giá -->
+                                        <td>
+                                            <span class="text-danger fw-bold" th:text="${#numbers.formatDecimal(post.price, 0, 'POINT', 0, 'POINT')} + ' đ'">0 đ</span>
+                                        </td>
+                                        
+                                        <!-- Trạng thái -->
+                                        <td>
+                                            <span class="badge px-3 py-2 rounded-pill"
+                                                  th:classappend="${post.status == T(com.chonhanh.entity.PostStatus).active ? 'bg-success-subtle text-success' : 
+                                                                   (post.status == T(com.chonhanh.entity.PostStatus).pending ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger')}"
+                                                  th:text="${post.status}">Trạng thái</span>
+                                        </td>
+                                        
+                                        <!-- Nút thao tác -->
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/user/post/edit/{id}(id=${post.id})}" class="btn btn-sm btn-outline-primary px-3" title="Sửa tin">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-danger px-3" th:onclick="'deletePost(' + ${post.id} + ')'" title="Xóa tin">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Trường hợp chưa có tin đăng nào (Empty State) -->
+                        <div class="text-center py-5" th:if="${myPosts == null or myPosts.empty}">
+                            <div class="mb-3">
+                                <i class="fas fa-box-open fa-3x text-muted"></i>
+                            </div>
+                            <h5 class="text-secondary fw-semibold">Không tìm thấy tin đăng nào phù hợp</h5>
+                            <p class="text-muted mb-4">Hãy thử tìm kiếm với từ khóa khác hoặc đăng bán sản phẩm mới nhé!</p>
+                            <a href="/post/create" class="btn btn-outline-primary px-4 rounded-pill">Đăng tin ngay</a>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 👉 THANH PHÂN TRANG -->
+             <!-- 👉 THANH PHÂN TRANG RÚT GỌN (Không bao giờ bị phình) -->
+<nav th:if="${myPosts != null and myPosts.totalPages > 1}" aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center mb-0">
+        <!-- Nút Về trang đầu -->
+        <li class="page-item" th:classappend="${myPosts.first} ? 'disabled'">
+            <a class="page-link shadow-sm" th:href="@{/user/my-posts(page=0, keyword=${keyword})}">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+        </li>
+        
+        <!-- Nút Trước -->
+        <li class="page-item" th:classappend="${myPosts.first} ? 'disabled'">
+            <a class="page-link shadow-sm" th:href="@{/user/my-posts(page=${myPosts.number - 1}, keyword=${keyword})}">
+                <i class="fas fa-chevron-left small"></i> Trước
+            </a>
+        </li>
+        
+        <!-- Dấu ... ở đầu -->
+        <li class="page-item disabled" th:if="${startPage > 0}">
+            <span class="page-link shadow-sm">...</span>
+        </li>
+
+        <!-- Các trang rút gọn -->
+        <li class="page-item" th:each="i : ${#numbers.sequence(startPage, endPage)}" th:classappend="${i == myPosts.number} ? 'active'">
+            <a class="page-link shadow-sm" th:href="@{/user/my-posts(page=${i}, keyword=${keyword})}" th:text="${i + 1}">1</a>
+        </li>
+        
+        <!-- Dấu ... ở cuối -->
+        <li class="page-item disabled" th:if="${endPage < myPosts.totalPages - 1}">
+            <span class="page-link shadow-sm">...</span>
+        </li>
+        
+        <!-- Nút Sau -->
+        <li class="page-item" th:classappend="${myPosts.last} ? 'disabled'">
+            <a class="page-link shadow-sm" th:href="@{/user/my-posts(page=${myPosts.number + 1}, keyword=${keyword})}">
+                Sau <i class="fas fa-chevron-right small"></i>
+            </a>
+        </li>
+
+        <!-- Nút Đến trang cuối -->
+        <li class="page-item" th:classappend="${myPosts.last} ? 'disabled'">
+            <a class="page-link shadow-sm" th:href="@{/user/my-posts(page=${myPosts.totalPages - 1}, keyword=${keyword})}">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    function deletePost(postId) {
+        if(confirm('Bạn có chắc chắn muốn xóa tin này không? Hành động này không thể hoàn tác.')) {
+            window.location.href = '/user/post/delete/' + postId;
+        }
+    }
+    </script>
+</body>
+</html>

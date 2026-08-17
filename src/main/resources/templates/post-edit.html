@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chỉnh sửa tin đăng - Chợ Nhanh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { border: none; }
+        .navbar-chonhanh {
+            background-color: #0d6efd;
+        }
+        .nav-item.dropdown:hover .dropdown-menu {
+            display: block;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-chonhanh shadow-sm px-4">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold fs-4 text-white" href="/">
+            <i class="fas fa-bolt text-warning me-1"></i> CHỢ NHANH
+        </a>
+
+        <div class="ms-auto d-flex align-items-center">
+            <a href="/post/create" class="btn btn-warning text-dark fw-semibold me-3 px-3">
+                <i class="fas fa-plus-circle me-1"></i> Đăng tin
+            </a>
+
+            <div th:if="${session.loggedInUser != null}" class="nav-item dropdown list-unstyled">
+                <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" role="button" 
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user-circle me-1"></i> Xin chào, <span th:text="${session.loggedInUser.fullName}">Tên User</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                    <li><a class="dropdown-item py-2" href="/user/my-posts"><i class="fas fa-clipboard-list text-primary me-2"></i> Quản lý tin của tôi</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm p-4">
+                <h4 class="fw-bold mb-4"><i class="fas fa-edit me-2 text-primary"></i> Chỉnh sửa tin đăng</h4>
+                
+                <!-- Form sửa tin gửi về /post/edit/{id} -->
+                <form th:action="@{'/user/post/edit/' + ${postDTO.id}}" th:object="${postDTO}" method="POST" enctype="multipart/form-data">
+                    
+                    <!-- Tiêu đề -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tiêu đề tin đăng</label>
+                        <input type="text" th:field="*{title}" class="form-control" required>
+                    </div>
+
+                    <div class="row">
+                        <!-- Giá -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Giá (VNĐ)</label>
+                            <input type="number" th:field="*{price}" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                        <!-- Danh mục -->
+                        <label class="form-label fw-bold">Danh mục</label>
+    <select th:field="*{categoryId}" class="form-select" required>
+    <option value="" disabled>-- Chọn danh mục --</option>
+    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+</select></div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Tỉnh -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tỉnh / Thành phố</label>
+                            <input type="text" th:field="*{province}" class="form-control" required>
+                        </div>
+                        <!-- Quận Huyện -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Quận / Huyện</label>
+                            <input type="text" th:field="*{district}" class="form-control" required>
+                        </div>
+                    </div>
+
+             
+                    <!-- Thông số kỹ thuật (JSON) -->
+<div class="mb-3">
+    <label class="form-label fw-bold">Thông số kỹ thuật (Dạng JSON)</label>
+    <textarea th:field="*{attributesJson}" class="form-control" rows="2" placeholder='Ví dụ: {"RAM": "8GB", "Màu": "Đen"}'></textarea>
+</div>
+
+                    <!-- Mô tả -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả chi tiết</label>
+                        <textarea th:field="*{description}" class="form-control" rows="5" required></textarea>
+                    </div>
+
+                    <!-- Chọn ảnh mới (Tùy chọn) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cập nhật ảnh mới (Nếu muốn thay đổi ảnh)</label>
+                        <input type="file" name="files" class="form-control" multiple accept="image/*">
+                        <div class="form-text text-muted">Bỏ trống nếu bạn muốn giữ nguyên các ảnh cũ của bài viết.</div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <a href="/user/my-posts" class="btn btn-secondary w-50 py-2">Hủy</a>
+                        <button type="submit" class="btn btn-primary w-50 py-2">Lưu thay đổi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-dark text-white text-center py-4 mt-5">
+    <p>© 2026 Chợ Nhanh - Nền tảng rao vặt trực tuyến</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+<script>
+    document.querySelector('form').addEventListener('submit', function() {
+        const submitBtn = document.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Đang lưu...";
+    });
+</script>
+</html>

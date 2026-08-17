@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý bài viết - Chợ Nhanh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar { min-height: 100vh; background-color: #212529; }
+        .sidebar .nav-link { color: #cbd5e1; padding: 12px 20px; margin-bottom: 5px; border-radius: 8px; transition: 0.3s; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: white; background-color: #0d6efd; }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- SIDEBAR MENU -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar px-3">
+            <div class="position-sticky pt-4">
+                <h4 class="text-white text-center pb-3 border-bottom border-secondary">⚡ Chợ Nhanh Admin</h4>
+                <ul class="nav flex-column mt-4">
+                    <li class="nav-item"><a class="nav-link" href="/admin/dashboard"><i class="fas fa-chart-pie me-2"></i> Tổng quan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="fas fa-users me-2"></i> Quản lý Người dùng</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/admin/posts"><i class="fas fa-newspaper me-2"></i> Quản lý  Bài viết</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/categories"><i class="fas fa-list me-2"></i> Quản lý  Danh mục</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4">
+            <h2 class="mb-4">Quản lý bài viết</h2>
+
+            <!-- TABS -->
+            <ul class="nav nav-tabs" id="postTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pending">Chờ duyệt</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#processed">Đã xử lý</button>
+                </li>
+            </ul>
+
+            <div class="tab-content bg-white p-3 border border-top-0 shadow-sm rounded-bottom">
+                <!-- Tab 1: Chờ duyệt -->
+                <div class="tab-pane fade show active" id="pending">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr><th>ID</th><th>Tiêu đề</th><th>Người đăng</th><th>Thao tác</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="post : ${pendingPosts}">
+                                <td th:text="${post.id}"></td>
+                                <td th:text="${post.title}"></td>
+                                <td th:text="${post.sellerName}"></td>
+                                <td>
+                                    <button class="btn btn-sm btn-success" th:onclick="'updateStatus(' + ${post.id} + ', \'active\')'">Duyệt</button>
+                                    <button class="btn btn-sm btn-warning" th:onclick="'updateStatus(' + ${post.id} + ', \'rejected\')'">Từ chối</button>
+                                    <button class="btn btn-sm btn-danger" th:onclick="'deletePost(' + ${post.id} + ')'">Xóa</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tab 2: Đã xử lý -->
+                <div class="tab-pane fade" id="processed">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr><th>ID</th><th>Tiêu đề</th><th>Trạng thái</th><th>Thao tác</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="post : ${processedPosts}">
+                                <td th:text="${post.id}"></td>
+                                <td th:text="${post.title}"></td>
+                                <td>
+                                    <span th:class="${post.status.name() == 'active' ? 'badge bg-success' : 'badge bg-danger'}" 
+                                          th:text="${post.status.name()}"></span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" th:onclick="'deletePost(' + ${post.id} + ')'">Xóa</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function updateStatus(id, status) {
+        fetch(`/api/admin/posts/${id}/status?status=${status}`, { method: 'PUT' })
+        .then(res => res.ok ? location.reload() : alert("Lỗi cập nhật!"));
+    }
+
+    function deletePost(id) {
+        if(confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
+            fetch(`/api/admin/posts/${id}`, { method: 'DELETE' })
+            .then(res => res.ok ? location.reload() : alert("Lỗi xóa!"));
+        }
+    }
+</script>
+</body>
+</html>
