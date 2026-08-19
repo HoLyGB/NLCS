@@ -60,4 +60,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     
     List<Post> findTop5ByOrderByIdDesc();
     
+ // Sửa lại câu lệnh query chuẩn theo thuộc tính của SavedPost Entity (sp.post và sp.user.id)
+    @Query("SELECT sp.post FROM SavedPost sp WHERE sp.user.id = :userId")
+    List<Post> findSavedPostsByUserId(@Param("userId") Long userId);
+    
 }

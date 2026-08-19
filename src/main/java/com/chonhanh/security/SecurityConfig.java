@@ -53,7 +53,11 @@ public class SecurityConfig {
             // Tắt CSRF và CORS bằng cú pháp mới
             .csrf(AbstractHttpConfigurer::disable)
             .cors(AbstractHttpConfigurer::disable)
-   
+            .logout(logout -> logout
+                    .logoutUrl("/logout") // Đường dẫn kích hoạt đăng xuất
+                    .logoutSuccessUrl("/dangnhap?logout") // Hoặc đổi thành "/" nếu muốn về trang chủ
+                    .permitAll()
+                )
             // Cấu hình Session không lưu trạng thái (Stateless) vì đã dùng JWT
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             
@@ -66,6 +70,8 @@ public class SecurityConfig {
 //                .requestMatchers("/api/admin/**").hasRole("ADMIN")
 //                .anyRequest().permitAll()
             		.requestMatchers("/**").permitAll()
+            		
+            		
             );
 
         http.authenticationProvider(authenticationProvider());

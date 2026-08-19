@@ -28,9 +28,9 @@ public class AuthController {
         return "register";
     }
     @PostMapping("/dangnhap")
-    public String handleLogin(@RequestParam String username, 
-                              @RequestParam String password, 
-                              HttpSession session, 
+    public String handleLogin(@RequestParam String username,
+                              @RequestParam String password,
+                              HttpSession session,
                               Model model) {
         
         // Kiểm tra thông tin trong Service
@@ -38,14 +38,21 @@ public class AuthController {
 
         if (user != null) {
             // Lưu thông tin người dùng vào Session
+        	System.out.println("ROLE THỰC TẾ TRONG DATABASE LÀ: " + user.getRole());
             session.setAttribute("loggedInUser", user);
-            
-            // Chuyển hướng về trang chủ
-            return "redirect:/trangchu"; 
+
+            // KIỂM TRA QUYỀN (ROLE) ĐỂ ĐIỀU HƯỚNG PHÙ HỢP
+            // Giả sử cột role lưu chuỗi là "ADMIN" hoặc "ROLE_ADMIN"
+            if ("ADMIN".equalsIgnoreCase(String.valueOf(user.getRole()))) {
+                return "redirect:/admin/dashboard"; // Chuyển hướng sang trang quản trị của Admin
+            } else {
+                return "redirect:/trangchu"; // Chuyển hướng sang trang chủ của User thường
+            }
+
         } else {
             // Nếu sai mật khẩu hoặc user, báo lỗi
             model.addAttribute("error", "Số điện thoại/Email hoặc mật khẩu không đúng!");
-            return "login";
+            return "login"; // Trả về trang đăng nhập
         }
     }
     // Đón dữ liệu từ Form Đăng ký

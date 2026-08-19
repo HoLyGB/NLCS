@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cài đặt tài khoản - Chợ Nhanh</title>
+    <!-- Bootstrap 5 & FontAwesome giống trang đăng tin -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { border: none; }
+        /* CSS giữ nguyên màu sắc và hiệu ứng Navbar CHỢ NHANH */
+        .navbar-chonhanh {
+            background-color: #0d6efd; 
+        }
+        /* Hiệu ứng hover dropdown tên người dùng */
+        .nav-item.dropdown:hover .dropdown-menu {
+            display: block;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Nhúng thanh Navbar chung của hệ thống -->
+<div th:replace="navbar :: myNavbar"></div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            
+            <!-- FORM 1: CẬP NHẬT THÔNG TIN CÁ NHÂN -->
+            <div class="card shadow-sm p-4 mb-4">
+                <h4 class="fw-bold mb-4"><i class="fas fa-user-edit me-2 text-primary"></i> Chỉnh sửa thông tin cá nhân</h4>
+                
+                <!-- Hiển thị thông báo -->
+                <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+                <form th:action="@{/profile/update}" method="post" enctype="multipart/form-data">
+                    
+                    <!-- Ảnh đại diện hiện tại -->
+                    <div class="mb-3 text-center">
+                        <img th:src="${user.avatarUrl != null ? user.avatarUrl : '/images/default-avatar.png'}" 
+                             alt="Avatar" class="rounded-circle shadow-sm" width="110" height="110" style="object-fit: cover;">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ảnh đại diện mới:</label>
+                        <input type="file" name="avatar" class="form-control" accept="image/*">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Họ và tên:</label>
+                        <input type="text" name="fullName" th:value="${user.fullName}" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email (Không thể thay đổi):</label>
+                        <input type="email" th:value="${user.email}" class="form-control" disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Số điện thoại:</label>
+                        <input type="text" name="phone" th:value="${user.phone}" class="form-control">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 mt-3">Lưu thay đổi thông tin</button>
+                </form>
+            </div>
+
+            <!-- FORM 2: ĐỔI MẬT KHẨU -->
+            <div class="card shadow-sm p-4">
+                <h4 class="fw-bold mb-4"><i class="fas fa-key me-2 text-warning"></i> Đổi mật khẩu bảo mật</h4>
+                
+                <!-- Hiển thị thông báo đổi mật khẩu -->
+                <div th:if="${successPasswordMessage}" class="alert alert-success" th:text="${successPasswordMessage}"></div>
+                <div th:if="${errorPasswordMessage}" class="alert alert-danger" th:text="${errorPasswordMessage}"></div>
+
+                <form th:action="@{/profile/change-password}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mật khẩu hiện tại:</label>
+                        <input type="password" name="currentPassword" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mật khẩu mới:</label>
+                        <input type="password" name="newPassword" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Xác nhận mật khẩu mới:</label>
+                        <input type="password" name="confirmPassword" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100 py-2 mt-3 text-white">Xác nhận đổi mật khẩu</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<footer class="bg-dark text-white text-center py-4 mt-5">
+    <p>© 2026 Chợ Nhanh - Nền tảng rao vặt trực tuyến</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

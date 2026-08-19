@@ -31,8 +31,26 @@
 
             <!-- MAIN CONTENT -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-light" style="min-height: 100vh;">
-                <div class="d-flex justify-content-between flex-wrap align-items-center pt-4 pb-2 mb-4 border-bottom">
+                
+                <!-- THANH HEADER BỔ SUNG: HIỂN THỊ TÊN ADMIN VÀ NÚT ĐĂNG XUẤT -->
+                <div class="d-flex justify-content-between flex-wrap align-items-center pt-4 pb-2 mb-3 border-bottom">
                     <h2 class="fw-bold">Bảng Điều Khiển</h2>
+                    
+                    <div class="d-flex align-items-center">
+                        <!-- Hiển thị tên người đang đăng nhập từ Session -->
+                        <span class="me-3 fw-semibold text-secondary">
+                            <i class="fas fa-user-shield me-1 text-primary"></i> 
+                            Xin chào, <span th:text="${session.loggedInUser != null ? session.loggedInUser.fullName : 'Admin'}">Quản trị viên</span>
+                        </span>
+                        
+                        <!-- Nút về trang chủ và nút Đăng xuất -->
+                        <a th:href="@{/}" class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-home me-1"></i> Trang chủ
+                        </a>
+                        <a th:href="@{/logout}" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-sign-out-alt me-1"></i> Đăng xuất
+                        </a>
+                    </div>
                 </div>
 
                 <!-- 4 Ô THỐNG KÊ (HIỂN THỊ DỮ LIỆU THẬT) -->
@@ -41,7 +59,8 @@
                         <div class="card text-white bg-primary shadow-sm border-0">
                             <div class="card-body">
                                 <h6 class="card-title">Tin đăng hoạt động</h6>
-<h2 class="card-text fw-bold" th:text="${activePostsCount != null ? activePostsCount : 0}">0</h2>                            </div>
+                                <h2 class="card-text fw-bold" th:text="${activePostsCount != null ? activePostsCount : 0}">0</h2>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-3">

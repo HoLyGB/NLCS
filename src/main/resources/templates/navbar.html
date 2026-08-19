@@ -49,14 +49,21 @@
                     <!-- TRƯỜNG HỢP 1: Đã đăng nhập -->
                     <li class="nav-item dropdown" th:if="${session.loggedInUser != null}">
                         <a class="nav-link dropdown-toggle text-white fw-semibold d-flex align-items-center py-1 px-2 rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 32px; height: 32px;">
-                                <i class="fas fa-user small"></i>
-                            </div>
+                            <img th:src="${session.loggedInUser.avatarUrl != null ? session.loggedInUser.avatarUrl : '/images/default-avatar.png'}" 
+                             alt="Avatar" class="rounded-circle me-2 border border-white shadow-sm" width="35" height="35" style="object-fit: cover;">
                             <span th:text="${session.loggedInUser.fullName}">Tên User</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
                             <li><a class="dropdown-item py-2" href="/user/my-posts"><i class="fas fa-clipboard-list me-2 text-primary"></i> Quản lý tin của tôi</a></li>
                             <li><hr class="dropdown-divider"></li>
+                               <li><a class="dropdown-item py-2" href="/profile"><i class="fas fa-clipboard-list me-2 text-primary"></i> Chỉnh sửa thông tin</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+    <a class="dropdown-item" th:href="@{/profile/saved-posts}">
+        <i class="fas fa-heart me-2 text-danger"></i> Tin đã lưu
+    </a>
+</li>
+ <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
                         </ul>
                     </li>

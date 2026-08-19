@@ -91,13 +91,16 @@
             <div class="modal-body">
                 <input type="hidden" id="catId">
                 <div class="mb-3"><label>Tên danh mục</label><input type="text" id="catName" class="form-control"></div>
-              <div class="mb-3">
+   <div class="mb-3">
     <label class="form-label">Danh mục cha</label>
     <select id="catParentId" class="form-select">
         <option value="">-- Không có (Danh mục gốc) --</option>
-        <option th:each="c : ${allCategories}" 
+        
+        <!-- ĐỔI allCategories THÀNH categories -->
+        <option th:each="c : ${categories}" 
                 th:value="${c.id}" 
                 th:text="${c.name}"></option>
+        
     </select>
 </div>
             </div>

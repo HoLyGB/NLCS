@@ -284,4 +284,8 @@ public Page<Post> getMyPostsPaged(Long userId, String keyword, int page, int siz
     Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
     return postRepository.findMyPostsWithSearch(userId, keyword, pageable);
 }
+
+public List<Post> getSavedPostsByUserId(Long userId) {
+    return postRepository.findSavedPostsByUserId(userId);
+}
 }
