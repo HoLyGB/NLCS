@@ -27,6 +27,33 @@ public class AuthController {
     public String showRegisterPage() {
         return "register";
     }
+//    @PostMapping("/dangnhap")
+//    public String handleLogin(@RequestParam String username,
+//                              @RequestParam String password,
+//                              HttpSession session,
+//                              Model model) {
+//        
+//        // Kiểm tra thông tin trong Service
+//        User user = userService.authenticate(username, password);
+//
+//        if (user != null) {
+//            // Lưu thông tin người dùng vào Session
+//            session.setAttribute("loggedInUser", user);
+//
+//            // KIỂM TRA QUYỀN (ROLE) ĐỂ ĐIỀU HƯỚNG PHÙ HỢP
+//            // Giả sử cột role lưu chuỗi là "ADMIN" hoặc "ROLE_ADMIN"
+//            if ("ADMIN".equalsIgnoreCase(String.valueOf(user.getRole()))) {
+//                return "redirect:/admin/dashboard"; // Chuyển hướng sang trang quản trị của Admin
+//            } else {
+//                return "redirect:/trangchu"; // Chuyển hướng sang trang chủ của User thường
+//            }
+//
+//        } else {
+//            // Nếu sai mật khẩu hoặc user, báo lỗi
+//            model.addAttribute("error", "Số điện thoại/Email hoặc mật khẩu không đúng!");
+//            return "login"; // Trả về trang đăng nhập
+//        }
+//    }
     @PostMapping("/dangnhap")
     public String handleLogin(@RequestParam String username,
                               @RequestParam String password,
@@ -37,12 +64,18 @@ public class AuthController {
         User user = userService.authenticate(username, password);
 
         if (user != null) {
+            
+            // KIỂM TRA TRẠNG THÁI TÀI KHOẢN BỊ KHÓA (isActive = false)
+            if (user.getIsActive() != null && !user.getIsActive()) {
+                model.addAttribute("error", "Tài khoản của bạn đã bị khóa !");
+                return "login"; // Trả về trang đăng nhập và hiển thị lỗi
+            }
+
             // Lưu thông tin người dùng vào Session
-        	System.out.println("ROLE THỰC TẾ TRONG DATABASE LÀ: " + user.getRole());
+            System.out.println("ROLE THỰC TẾ TRONG DATABASE LÀ: " + user.getRole());
             session.setAttribute("loggedInUser", user);
 
             // KIỂM TRA QUYỀN (ROLE) ĐỂ ĐIỀU HƯỚNG PHÙ HỢP
-            // Giả sử cột role lưu chuỗi là "ADMIN" hoặc "ROLE_ADMIN"
             if ("ADMIN".equalsIgnoreCase(String.valueOf(user.getRole()))) {
                 return "redirect:/admin/dashboard"; // Chuyển hướng sang trang quản trị của Admin
             } else {
